@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Package manager
+.pnpm-store/
+
+# Logs & diagnostics
+*.log
+.plugin-manager/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

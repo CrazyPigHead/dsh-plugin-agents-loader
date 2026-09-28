@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Agents Loader",
+    "description": "Auto-discovers ~/.agents/ sources at startup: mcp.json MCP servers (http and stdio), commands/*.md slash commands, and a one-time AGENTS.md link. Reloads automatically when the files change."
+  }
+}
