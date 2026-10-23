@@ -2,7 +2,9 @@
  * dsh-plugin-agents-loader — Auto-discover and load:
  *   1. ~/.agents/mcp.json  → MCP servers (http + stdio) via ctx.plugin()
  *   2. ~/.agents/commands/ → slash commands via commands.register()
- *   3. ~/.agents/AGENTS.md  → one-time copy to ~/.dsh/AGENTS.md
+ *
+ * 注：~/.agents/AGENTS.md 自 dsh 0.2.1-rc.2 起由原生 dsh-agent-instructions
+ * 直接读取（agents-global 作用域），本插件不再做软链迁移。
  *
  * 所有动态资源装进一个可整体销毁的 generation fiber：
  * mcp.json / commands 目录内容变化时，销毁旧 generation 并重建，
@@ -14,7 +16,6 @@
 import { watch } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { tryMigrateAgentsMd } from './agents-md.js'
 import { loadMcpServers } from './mcp-loader.js'
 import { loadCommands } from './commands-loader.js'
 
@@ -51,9 +52,6 @@ const GENERATION_PLUGIN = {
  * @param {import('@deepseek-ai/cordis').Context} ctx
  */
 export function apply(ctx) {
-  // 一次性 AGENTS.md 迁移（从不覆盖已有目标）
-  tryMigrateAgentsMd(ctx)
-
   let generation = ctx.plugin(GENERATION_PLUGIN)
   let reloadTimer = null
 

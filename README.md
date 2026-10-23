@@ -4,7 +4,20 @@
 
 > dsh 全局插件：启动时自动发现并加载 `~/.agents/mcp.json`（MCP 服务器，支持 http 与 stdio）和 `~/.agents/commands/*.md`（斜杠命令）到运行中的 dsh Host，文件变更时自动重载。
 
-适配 dsh `0.1.7-rc.2`（cordis `4.0.4`）。peer 依赖按 dsh 官方包惯例**精确锁定**版本，安装前请阅读[「安装 · 前置要求」](#前置要求)。
+适配 dsh `0.2.1-rc.2`（cordis `4.0.5`）。peer 依赖按 dsh 官方包惯例**精确锁定**版本，安装前请阅读[「安装 · 前置要求」](#前置要求)。
+
+## 与 dsh 原生能力的关系
+
+dsh `0.2.1-rc.2` 已把 `~/.agents` 定位为跨工具共享的 agent 配置根（`dsh-home-paths` 的 `resolveAgentsHome`，可用 `$DSH_AGENTS_HOME` 覆盖），且以下内容**已原生支持，无需本插件**：
+
+| `~/.agents/` 下的内容 | 原生支持 |
+|---|---|
+| `AGENTS.md` | `dsh-agent-instructions` 直接读取（`agents-global` 作用域，与 `~/.dsh/AGENTS.md` 同组去重） |
+| `skills/` | `dsh-skill-filesystem` 目录发现 + 原生 watcher 热重载 |
+| `mcp.json` | ❌ 无——`dsh-mcp-client` 只能在 cordis 配置里逐实例声明 |
+| `commands/*.md` | ❌ 无——`dsh-commands` 只是注册 API，没有文件发现 |
+
+本插件只补齐最后两项；上游将来若原生支持 `mcp.json` / `commands` 发现，本插件即可退役。
 
 ## 功能
 
@@ -12,7 +25,6 @@
 |------|--------|------|
 | `~/.agents/mcp.json` | `ctx.plugin(dsh-mcp-client, …)` | 对每个 `enabled !== false` 的 MCP 服务器创建子 fiber，自动注册其工具为 `mcp__<server>__<tool>`；支持 `http`（streamable-http）与 `stdio` 两种 transport |
 | `~/.agents/commands/*.md` | `commands.register(…)` | 每个 `.md` 文件注册一个斜杠命令；frontmatter 的 `description` 用作命令描述，正文在触发时注入 agent |
-| `~/.agents/AGENTS.md` | `~/.dsh/AGENTS.md` | **仅首次**运行且目标不存在时创建软链接；之后源文件修改自动同步到 dsh 原生 `dsh-agent-instructions` |
 | `mcp.json` / `commands/` 变更 | generation fiber 重建 | 内置 `fs.watch` + 500ms 防抖：配置文件变化自动销毁并重建全部动态资源，无需重启 |
 
 ## 架构
@@ -21,15 +33,13 @@
 src/
 ├── entry.js              # apply() 主入口：generation fiber + fs.watch 自动重载
 ├── mcp-loader.js         # MCP 服务器加载（懒解析 dsh-mcp-client，http + stdio）
-├── commands-loader.js    # 斜杠命令注册（inject ['commands']）
-└── agents-md.js          # AGENTS.md 一次性迁移
+└── commands-loader.js    # 斜杠命令注册（inject ['commands']）
 ```
 
 ### 启动数据流
 
 ```
 apply(ctx)
-  ├── tryMigrateAgentsMd(ctx)        # 同步：首次创建 AGENTS.md 软链接
   ├── ctx.plugin(generation)         # 动态资源的可整体销毁容器
   │     ├── loadMcpServers(ctx)      # 异步：读 mcp.json，逐个 ctx.plugin()
   │     └── ctx.inject(['commands']) # 扫描 commands/*.md → register()
@@ -40,7 +50,7 @@ apply(ctx)
 
 ### 前置要求
 
-- dsh `0.1.7-rc.2`（用 `dsh --version` 确认）。peer 依赖按 dsh 官方包惯例**精确锁定**
+- dsh `0.2.1-rc.2`（用 `dsh --version` 确认）。peer 依赖按 dsh 官方包惯例**精确锁定**
   版本，安装时 dsh 会在 pnpm 运行前按 peer 声明检查运行时版本：不匹配会直接失败并
   返回 `incompatible-version`，不下载任何内容。确需在其它 dsh 版本上使用时，按错误
   提示登记 version exemption（CLI：`dsh plugin --profile <name> allow-version …`），
@@ -111,7 +121,7 @@ dsh --profile <name> --dump-config | grep -A1 agents-loader
 `name` 完全一致；profile 的 `cordis.yml`（组合产物）与用户级 `cordis.patch.yml`
 都不用动。peer 依赖不会写进 profile（`autoInstallPeers: false`），运行时由插件的
 懒解析回退链从 dsh 自身依赖树解析（见「开发」）。若将来发布到 npm，安装命令的
-spec 换成版本号（如 `dsh-plugin-agents-loader@0.2.0`）即可。
+spec 换成版本号（如 `dsh-plugin-agents-loader@0.2.1`）即可。
 
 ## 配置
 

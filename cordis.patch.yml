@@ -2,7 +2,8 @@
 # Inserts the Host plugin row that auto-loads ~/.agents/ sources at startup:
 #   - ~/.agents/mcp.json        -> per-server dsh-mcp-client plugin instances
 #   - ~/.agents/commands/*.md   -> slash commands on the commands service
-#   - ~/.agents/AGENTS.md       -> one-time symlink into ~/.dsh/AGENTS.md
+# (~/.agents/AGENTS.md is read natively by dsh-agent-instructions since
+# dsh 0.2.1-rc.2 and needs no plugin support.)
 # mcp.json 与 commands/ 目录的内容变更由插件内部的 fs.watch 自动重载，
 # 无需重启 dsh；只有修改本插件源码时才需要重启进程换新模块代次。
 - insert:

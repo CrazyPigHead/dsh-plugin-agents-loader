@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-agents-loader",
-  "description": "Auto-discover and load ~/.agents/mcp.json MCP servers (http + stdio), ~/.agents/commands/ slash commands, and ~/.agents/AGENTS.md into dsh",
-  "version": "0.2.0",
+  "description": "Auto-discover and load ~/.agents/mcp.json MCP servers (http + stdio) and ~/.agents/commands/ slash commands into dsh",
+  "version": "0.3.0",
   "type": "module",
   "main": "src/entry.js",
   "exports": {
@@ -40,8 +40,8 @@
     }
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "4.0.4",
-    "@deepseek-ai/dsh-mcp-client": "0.1.7-rc.2"
+    "@deepseek-ai/cordis": "~4.0.5",
+    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.2"
   },
   "license": "MIT"
 }

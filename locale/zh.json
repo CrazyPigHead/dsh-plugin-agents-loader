@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Agents 加载器",
-    "description": "启动时自动发现 ~/.agents/ 资源：mcp.json 中的 MCP 服务器（http 与 stdio）、commands/*.md 斜杠命令，以及一次性 AGENTS.md 软链接。文件变更时自动重载。"
+    "description": "启动时自动发现 ~/.agents/ 资源：mcp.json 中的 MCP 服务器（http 与 stdio）、commands/*.md 斜杠命令。文件变更时自动重载。"
   }
 }
